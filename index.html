@@ -178,7 +178,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>NyaProxy指令生成器 - By Milk V1.3</h1>
+        <h1>NyaProxy指令生成器 - By Milk</h1>
         <div class="tab">
             <button id="commandTab" class="active" onclick="showCommandTab()">指令生成</button>
             <button id="transferTab" onclick="showTransferTab()">转移服务</button>
@@ -242,7 +242,7 @@
         <div class="version-info" onclick="window.location.href='https://github.com/Michaelwucoc/nyaproxy-commandgen'">
             <i class="fab fa-github"></i>
             <i class="fas fa-code-branch"></i>
-            <span>main-a1b2c3d</span>
+            <span id="version">加载中...</span>
         </div>
     </div>
 
@@ -250,6 +250,18 @@
         let currentService = 'usagebased.cn.hypixel';
         let fromService = 'usagebased.cn.hypixel';
         let toService = 'usagebased.cn.hypixel';
+
+        // 获取最新的commit hash
+        fetch('https://api.github.com/repos/Michaelwucoc/nyaproxy-commandgen/commits/main')
+            .then(response => response.json())
+            .then(data => {
+                const shortHash = data.sha.substring(0, 7);
+                document.getElementById('version').textContent = `main-${shortHash}`;
+            })
+            .catch(error => {
+                document.getElementById('version').textContent = '获取版本失败';
+                console.error('Error:', error);
+            });
 
         function showCommandTab() {
             document.getElementById('commandSection').style.display = 'block';
