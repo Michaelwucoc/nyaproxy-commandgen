@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NyaProxy指令生成器 - By Milk</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 300px;
+        }
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .tab {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .tab button {
+            background-color: #e0e0e0;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .tab button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        label {
+            margin-top: 10px;
+            display: block;
+            color: #555;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .service-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .service-button {
+            background-color: #e0e0e0;
+            color: #333;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .service-button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .server-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .server-button {
+            background-color: #e0e0e0;
+            color: #333;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .server-button:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #command, #transferResult, #convertedAmount {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+        #error {
+            color: red;
+            margin-top: 10px;
+            text-align: center;
+        }
+        #copyButton, #copyTransferButton {
+            display: none;
+            margin-top: 10px;
+        }
+        #serverInputSection {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NyaProxy指令生成器 - By Milk</h1>
+        <div class="tab">
+            <button id="commandTab" class="active" onclick="showCommandTab()">指令生成</button>
+            <button id="transferTab" onclick="showTransferTab()">转移服务</button>
+        </div>
+
+        <div id="commandSection">
+            <label>选择服务名称:</label>
+            <div class="service-buttons">
+                <button class="service-button active" data-service="usagebased.cn.hypixel" onclick="selectService(this)">Hypixel 加速 (按时计费)</button>
+                <button class="service-button" data-service="usagebased.de.any" onclick="selectService(this)">Europe 加速 (按时计费)</button>
+                <button class="service-button" data-service="usagebased.sg.any" onclick="selectService(this)">Asia 加速 (按时计费)</button>
+            </div>
+
+            <div id="serverInputSection">
+                <label for="serverAddress">服务器地址:</label>
+                <input type="text" id="serverAddress" placeholder="输入服务器地址">
+                
+                <div class="server-buttons">
+                    <button class="server-button" onclick="fillServer('pika.host')">pika.host</button>
+                    <button class="server-button" onclick="fillServer('premium.blocksmc.com')">premium.blocksmc.com</button>
+                    <button class="server-button" onclick="fillServer('blocksmc.com')">blocksmc.com</button>
+                    <button class="server-button" onclick="fillServer('mineblaze.ru')">mineblaze.ru</button>
+                    <button class="server-button" onclick="fillServer('revage.net')">revage.net</button>
+                    <button class="server-button" onclick="fillServer('gommehd.net')">gommehd.net</button>
+                </div>
+            </div>
+
+            <button onclick="generateCommand()">生成指令</button>
+            <button id="copyButton" onclick="copyCommand()">复制指令</button>
+
+            <div id="command"></div>
+            <div id="error"></div>
+        </div>
+
+        <div id="transferSection" style="display: none;">
+            <label for="amount">输入转移金额:</label>
+            <input type="number" id="amount" placeholder="例如: 100" min="1">
+
+            <label>选择转移来源:</label>
+            <div class="service-buttons">
+                <button class="service-button active" data-service="usagebased.cn.hypixel" onclick="selectFromService(this)">Hypixel 加速 (按时计费)</button>
+                <button class="service-button" data-service="usagebased.de.any" onclick="selectFromService(this)">Europe 加速 (按时计费)</button>
+                <button class="service-button" data-service="usagebased.sg.any" onclick="selectFromService(this)">Asia 加速 (按时计费)</button>
+            </div>
+
+            <label>选择转移目标:</label>
+            <div class="service-buttons">
+                <button class="service-button" data-service="usagebased.de.any" onclick="selectToService(this)">Europe 加速 (按时计费)</button>
+                <button class="service-button" data-service="usagebased.sg.any" onclick="selectToService(this)">Asia 加速 (按时计费)</button>
+                <button class="service-button active" data-service="usagebased.cn.hypixel" onclick="selectToService(this)">Hypixel 加速 (按时计费)</button>
+            </div>
+
+            <button onclick="generateTransferCommand()">生成转移指令</button>
+            <button id="copyTransferButton" onclick="copyTransferCommand()">复制转移指令</button>
+
+            <div id="transferResult"></div>
+            <div id="convertedAmount"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentService = 'usagebased.cn.hypixel';
+        let fromService = 'usagebased.cn.hypixel';
+        let toService = 'usagebased.cn.hypixel';
+
+        function showCommandTab() {
+            document.getElementById('commandSection').style.display = 'block';
+            document.getElementById('transferSection').style.display = 'none';
+            document.getElementById('commandTab').classList.add('active');
+            document.getElementById('transferTab').classList.remove('active');
+        }
+
+        function showTransferTab() {
+            document.getElementById('commandSection').style.display = 'none';
+            document.getElementById('transferSection').style.display = 'block';
+            document.getElementById('transferTab').classList.add('active');
+            document.getElementById('commandTab').classList.remove('active');
+        }
+
+        function selectService(button) {
+            // 移除其他按钮的active类
+            document.querySelectorAll('#commandSection .service-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // 添加当前按钮的active类
+            button.classList.add('active');
+            currentService = button.dataset.service;
+
+            const serverInputSection = document.getElementById('serverInputSection');
+            if (currentService === 'usagebased.de.any' || currentService === 'usagebased.sg.any') {
+                serverInputSection.style.display = 'block';
+            } else {
+                serverInputSection.style.display = 'none';
+            }
+        }
+
+        function fillServer(server) {
+            const serverInput = document.getElementById('serverAddress');
+            serverInput.value = server;
+        }
+
+        function selectFromService(button) {
+            document.querySelectorAll('#transferSection .service-buttons:first-of-type .service-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            fromService = button.dataset.service;
+        }
+
+        function selectToService(button) {
+            document.querySelectorAll('#transferSection .service-buttons:last-of-type .service-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            toService = button.dataset.service;
+        }
+
+        function generateCommand() {
+            const serverAddressInput = document.getElementById('serverAddress');
+            const commandDiv = document.getElementById('command');
+            const errorDiv = document.getElementById('error');
+            const copyButton = document.getElementById('copyButton');
+
+            const serverAddress = serverAddressInput.value.trim();
+
+            // 清空之前的指令和错误信息
+            commandDiv.textContent = '';
+            errorDiv.textContent = '';
+            copyButton.style.display = 'none';
+
+            // 检查 EU 和 AS 服务是否输入了服务器地址
+            if ((currentService === "usagebased.de.any" || currentService === "usagebased.sg.any") && serverAddress === "") {
+                errorDiv.textContent = "对于 EU 和 AS 服务，必须输入服务器地址。";
+                return;
+            }
+
+            // Hypixel 服务不需要服务器地址
+            if (currentService.startsWith("usagebased.cn.hypixel")) {
+                commandDiv.textContent = `!start ${currentService}`;
+            } else {
+                let command = `!start ${currentService}`;
+                if (serverAddress !== "") {
+                    command += ` -t ${serverAddress}`;
+                }
+                commandDiv.textContent = command;
+            }
+
+            copyButton.style.display = 'block';
+        }
+
+        function generateTransferCommand() {
+            const amountInput = document.getElementById('amount');
+            const transferResultDiv = document.getElementById('transferResult');
+            const convertedAmountDiv = document.getElementById('convertedAmount');
+            const copyTransferButton = document.getElementById('copyTransferButton');
+
+            const amount = parseFloat(amountInput.value);
+
+            // 清空之前的结果
+            transferResultDiv.textContent = '';
+            convertedAmountDiv.textContent = '';
+            copyTransferButton.style.display = 'none';
+
+            if (isNaN(amount) || amount <= 0) {
+                transferResultDiv.textContent = "请输入有效的转移金额。";
+                return;
+            }
+
+            let convertedAmount = amount;
+
+            if (fromService === "usagebased.cn.hypixel" && toService === "usagebased.de.any") {
+                convertedAmount = amount * 0.8;
+            } else if (fromService === "usagebased.de.any" && toService === "usagebased.cn.hypixel") {
+                convertedAmount = amount * 1;
+            } else if (fromService === "usagebased.cn.hypixel" && toService === "usagebased.sg.any") {
+                convertedAmount = amount * 0.8;
+            } else if (fromService === "usagebased.sg.any" && toService === "usagebased.cn.hypixel") {
+                convertedAmount = amount * 1;
+            } else if (fromService === "usagebased.de.any" && toService === "usagebased.sg.any") {
+                convertedAmount = amount;
+            } else if (fromService === "usagebased.sg.any" && toService === "usagebased.de.any") {
+                convertedAmount = amount;
+            }
+
+            const transferCommand = `/transfer ${amount} ${fromService} ${toService}`;
+            transferResultDiv.textContent = transferCommand;
+            convertedAmountDiv.textContent = `转移后数量: ${convertedAmount.toFixed(2)}`;
+            copyTransferButton.style.display = 'block';
+        }
+
+        function copyCommand() {
+            const commandDiv = document.getElementById('command');
+            const commandText = commandDiv.textContent;
+
+            const tempInput = document.createElement('input');
+            tempInput.value = commandText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            alert("指令已复制到剪贴板！");
+        }
+
+        function copyTransferCommand() {
+            const transferResultDiv = document.getElementById('transferResult');
+            const transferCommandText = transferResultDiv.textContent;
+
+            const tempInput = document.createElement('input');
+            tempInput.value = transferCommandText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            alert("转移指令已复制到剪贴板！");
+        }
+
+        // 默认显示指令生成部分
+        showCommandTab();
+    </script>
+</body>
+</html>
