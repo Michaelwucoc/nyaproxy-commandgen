@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NyaProxy指令生成器 - By Milk</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Noto Sans SC', sans-serif;
             background: linear-gradient(-45deg, #2196F3, #03A9F4, #00BCD4, #3F51B5);
             background-size: 400% 400%;
             animation: gradient 15s ease infinite;
@@ -155,6 +156,17 @@
         #copyButton, #copyTransferButton {
             display: none;
             margin-top: 10px;
+            background-color: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px #4CAF50;
+            }
+            to {
+                box-shadow: 0 0 20px #4CAF50;
+            }
         }
         #serverInputSection {
             display: none;
@@ -173,6 +185,10 @@
         }
         .version-info i {
             font-size: 16px;
+        }
+        .placeholder {
+            color: #999;
+            font-style: italic;
         }
     </style>
 </head>
@@ -194,7 +210,7 @@
 
             <div id="serverInputSection">
                 <label for="serverAddress">服务器地址:</label>
-                <input type="text" id="serverAddress" placeholder="输入服务器地址">
+                <input type="text" id="serverAddress" placeholder="输入服务器地址" oninput="updateCommand()">
                 
                 <div class="server-buttons">
                     <button class="server-button" onclick="fillServer('pika.host')">pika.host</button>
@@ -207,7 +223,6 @@
                 </div>
             </div>
 
-            <button onclick="generateCommand()">生成指令</button>
             <button id="copyButton" onclick="copyCommand()">复制指令</button>
 
             <div id="command"></div>
@@ -216,7 +231,7 @@
 
         <div id="transferSection" style="display: none;">
             <label for="amount">输入转移金额:</label>
-            <input type="number" id="amount" placeholder="例如: 100" min="1">
+            <input type="number" id="amount" placeholder="例如: 100" min="1" oninput="updateTransferCommand()">
 
             <label>选择转移来源:</label>
             <div class="service-buttons">
@@ -232,7 +247,6 @@
                 <button class="service-button to-service-button active" data-service="usagebased.cn.hypixel" onclick="selectToService(this)">Hypixel 加速 (按时计费)</button>
             </div>
 
-            <button onclick="generateTransferCommand()">生成转移指令</button>
             <button id="copyTransferButton" onclick="copyTransferCommand()">复制转移指令</button>
 
             <div id="transferResult"></div>
@@ -268,6 +282,7 @@
             document.getElementById('transferSection').style.display = 'none';
             document.getElementById('commandTab').classList.add('active');
             document.getElementById('transferTab').classList.remove('active');
+            updateCommand();
         }
 
         function showTransferTab() {
@@ -275,28 +290,44 @@
             document.getElementById('transferSection').style.display = 'block';
             document.getElementById('transferTab').classList.add('active');
             document.getElementById('commandTab').classList.remove('active');
+            updateTransferCommand();
         }
 
         function selectService(button) {
-            // 移除其他按钮的active类
             document.querySelectorAll('#commandSection .service-button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            // 添加当前按钮的active类
             button.classList.add('active');
             currentService = button.dataset.service;
 
             const serverInputSection = document.getElementById('serverInputSection');
             if (currentService === 'usagebased.de.any' || currentService === 'usagebased.sg.any') {
                 serverInputSection.style.display = 'block';
+                const serverButtons = document.querySelector('.server-buttons');
+                if (currentService === 'usagebased.de.any') {
+                    serverButtons.innerHTML = `
+                        <button class="server-button" onclick="fillServer('pika.host')">pika.host</button>
+                        <button class="server-button" onclick="fillServer('premium.blocksmc.com')">premium.blocksmc.com</button>
+                        <button class="server-button" onclick="fillServer('blocksmc.com')">blocksmc.com</button>
+                        <button class="server-button" onclick="fillServer('mineblaze.ru')">mineblaze.ru</button>
+                        <button class="server-button" onclick="fillServer('revage.net')">revage.net</button>
+                        <button class="server-button" onclick="fillServer('gommehd.net')">gommehd.net</button>
+                    `;
+                } else {
+                    serverButtons.innerHTML = `
+                        <button class="server-button" onclick="fillServer('as.minemen.club')">as.minemen.club</button>
+                    `;
+                }
             } else {
                 serverInputSection.style.display = 'none';
             }
+            updateCommand();
         }
 
         function fillServer(server) {
             const serverInput = document.getElementById('serverAddress');
             serverInput.value = server;
+            updateCommand();
         }
 
         function selectFromService(button) {
@@ -305,6 +336,7 @@
             });
             button.classList.add('active');
             fromService = button.dataset.service;
+            updateTransferCommand();
         }
 
         function selectToService(button) {
@@ -313,9 +345,10 @@
             });
             button.classList.add('active');
             toService = button.dataset.service;
+            updateTransferCommand();
         }
 
-        function generateCommand() {
+        function updateCommand() {
             const serverAddressInput = document.getElementById('serverAddress');
             const commandDiv = document.getElementById('command');
             const errorDiv = document.getElementById('error');
@@ -323,32 +356,24 @@
 
             const serverAddress = serverAddressInput.value.trim();
 
-            // 清空之前的指令和错误信息
             commandDiv.textContent = '';
             errorDiv.textContent = '';
-            copyButton.style.display = 'none';
 
-            // 检查 EU 和 AS 服务是否输入了服务器地址
-            if ((currentService === "usagebased.de.any" || currentService === "usagebased.sg.any") && serverAddress === "") {
-                errorDiv.textContent = "对于 EU 和 AS 服务，必须输入服务器地址。";
-                return;
-            }
-
-            // Hypixel 服务不需要服务器地址
-            if (currentService.startsWith("usagebased.cn.hypixel")) {
+            if (currentService === "usagebased.cn.hypixel") {
                 commandDiv.textContent = `!start ${currentService}`;
+                copyButton.style.display = 'block';
             } else {
-                let command = `!start ${currentService}`;
-                if (serverAddress !== "") {
-                    command += ` -t ${serverAddress}`;
+                if (serverAddress === "") {
+                    commandDiv.innerHTML = `<span class="placeholder">!start ${currentService} -t &lt;服务器地址&gt;</span>`;
+                    copyButton.style.display = 'none';
+                } else {
+                    commandDiv.textContent = `!start ${currentService} -t ${serverAddress}`;
+                    copyButton.style.display = 'block';
                 }
-                commandDiv.textContent = command;
             }
-
-            copyButton.style.display = 'block';
         }
 
-        function generateTransferCommand() {
+        function updateTransferCommand() {
             const amountInput = document.getElementById('amount');
             const transferResultDiv = document.getElementById('transferResult');
             const convertedAmountDiv = document.getElementById('convertedAmount');
@@ -356,13 +381,10 @@
 
             const amount = parseFloat(amountInput.value);
 
-            // 清空之前的结果
-            transferResultDiv.textContent = '';
-            convertedAmountDiv.textContent = '';
-            copyTransferButton.style.display = 'none';
-
             if (isNaN(amount) || amount <= 0) {
-                transferResultDiv.textContent = "请输入有效的转移金额。";
+                transferResultDiv.innerHTML = `<span class="placeholder">/transfer &lt;金额&gt; ${fromService} ${toService}</span>`;
+                convertedAmountDiv.textContent = '';
+                copyTransferButton.style.display = 'none';
                 return;
             }
 
@@ -416,8 +438,10 @@
             alert("转移指令已复制到剪贴板！");
         }
 
-        // 默认显示指令生成部分
+        // 初始化显示
         showCommandTab();
+        updateCommand();
+        updateTransferCommand();
     </script>
 </body>
 </html>
