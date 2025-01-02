@@ -103,6 +103,24 @@
             background-color: #2196F3;
             color: white;
         }
+        /* 转移来源按钮样式 */
+        .from-service-button {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+        }
+        .from-service-button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        /* 转移目标按钮样式 */
+        .to-service-button {
+            background-color: #FFF3E0;
+            color: #E65100;
+        }
+        .to-service-button.active {
+            background-color: #FF9800;
+            color: white;
+        }
         .server-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -202,16 +220,16 @@
 
             <label>选择转移来源:</label>
             <div class="service-buttons">
-                <button class="service-button active" data-service="usagebased.cn.hypixel" onclick="selectFromService(this)">Hypixel 加速 (按时计费)</button>
-                <button class="service-button" data-service="usagebased.de.any" onclick="selectFromService(this)">Europe 加速 (按时计费)</button>
-                <button class="service-button" data-service="usagebased.sg.any" onclick="selectFromService(this)">Asia 加速 (按时计费)</button>
+                <button class="service-button from-service-button active" data-service="usagebased.cn.hypixel" onclick="selectFromService(this)">Hypixel 加速 (按时计费)</button>
+                <button class="service-button from-service-button" data-service="usagebased.de.any" onclick="selectFromService(this)">Europe 加速 (按时计费)</button>
+                <button class="service-button from-service-button" data-service="usagebased.sg.any" onclick="selectFromService(this)">Asia 加速 (按时计费)</button>
             </div>
 
             <label>选择转移目标:</label>
             <div class="service-buttons">
-                <button class="service-button" data-service="usagebased.de.any" onclick="selectToService(this)">Europe 加速 (按时计费)</button>
-                <button class="service-button" data-service="usagebased.sg.any" onclick="selectToService(this)">Asia 加速 (按时计费)</button>
-                <button class="service-button active" data-service="usagebased.cn.hypixel" onclick="selectToService(this)">Hypixel 加速 (按时计费)</button>
+                <button class="service-button to-service-button" data-service="usagebased.de.any" onclick="selectToService(this)">Europe 加速 (按时计费)</button>
+                <button class="service-button to-service-button" data-service="usagebased.sg.any" onclick="selectToService(this)">Asia 加速 (按时计费)</button>
+                <button class="service-button to-service-button active" data-service="usagebased.cn.hypixel" onclick="selectToService(this)">Hypixel 加速 (按时计费)</button>
             </div>
 
             <button onclick="generateTransferCommand()">生成转移指令</button>
@@ -270,7 +288,7 @@
         }
 
         function selectFromService(button) {
-            document.querySelectorAll('#transferSection .service-buttons:first-of-type .service-button').forEach(btn => {
+            document.querySelectorAll('#transferSection .from-service-button').forEach(btn => {
                 btn.classList.remove('active');
             });
             button.classList.add('active');
@@ -278,7 +296,7 @@
         }
 
         function selectToService(button) {
-            document.querySelectorAll('#transferSection .service-buttons:last-of-type .service-button').forEach(btn => {
+            document.querySelectorAll('#transferSection .to-service-button').forEach(btn => {
                 btn.classList.remove('active');
             });
             button.classList.add('active');
