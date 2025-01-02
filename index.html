@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NyaProxy指令生成器 - By Milk</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -34,6 +35,7 @@
             padding: 20px;
             width: 300px;
             backdrop-filter: blur(10px);
+            position: relative;
         }
         h1 {
             font-size: 24px;
@@ -139,11 +141,26 @@
         #serverInputSection {
             display: none;
         }
+        .version-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #BBDEFB;
+            color: #757575;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .version-info i {
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>NyaProxy指令生成器 - By Milk V1.2</h1>
+        <h1>NyaProxy指令生成器 - By Milk V1.3</h1>
         <div class="tab">
             <button id="commandTab" class="active" onclick="showCommandTab()">指令生成</button>
             <button id="transferTab" onclick="showTransferTab()">转移服务</button>
@@ -202,6 +219,12 @@
 
             <div id="transferResult"></div>
             <div id="convertedAmount"></div>
+        </div>
+
+        <div class="version-info" onclick="window.location.href='https://github.com/Michaelwucoc/nyaproxy-commandgen'">
+            <i class="fab fa-github"></i>
+            <i class="fas fa-code-branch"></i>
+            <span>main-a1b2c3d</span>
         </div>
     </div>
 
