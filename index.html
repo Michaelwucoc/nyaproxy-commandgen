@@ -457,7 +457,7 @@
             const amount = parseFloat(amountInput.value);
 
             if (isNaN(amount) || amount <= 0) {
-                transferResultDiv.innerHTML = `<span class="placeholder">/transfer &lt;金额&gt; ${fromService} ${toService}</span>`;
+                transferResultDiv.innerHTML = `<span class="placeholder">!transfer &lt;金额&gt; ${fromService} ${toService}</span>`;
                 convertedAmountDiv.textContent = '';
                 copyTransferButton.style.display = 'none';
                 return;
@@ -479,7 +479,7 @@
                 convertedAmount = amount;
             }
 
-            const transferCommand = `/transfer ${amount} ${fromService} ${toService}`;
+            const transferCommand = `!transfer ${amount} ${fromService} ${toService}`;
             transferResultDiv.textContent = transferCommand;
             convertedAmountDiv.textContent = `转移后数量: ${convertedAmount.toFixed(2)}`;
             copyTransferButton.style.display = 'block';
